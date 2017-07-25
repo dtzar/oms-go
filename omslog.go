@@ -7,7 +7,7 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/docker/docker/daemon/logger"
-	"github.com/Azure/oms-log-analytics-firehose-nozzle/client"
+	"oms-go/oms_data_collector"
 )
 
 const (
@@ -27,7 +27,7 @@ type omsLogger struct {
 	containerName string
 	imageID string
 	imageName string
-	client client.Client
+	client oms_data_collector.OmsLogClient
 }
 
 type omsMessage struct {
@@ -81,7 +81,7 @@ func New(info logger.Info) (logger.Logger, error) {
 		containerName: info.ContainerName,
 		imageID: info.ContainerImageID,
 		imageName: info.ContainerImageName,
-		client: client.NewOmsClient(workspaceID, sharedKey, timeout, nil),
+		client: oms_data_collector.NewOmsLogClient(workspaceID, sharedKey, timeout),
 	}
 	
 	return l, nil
