@@ -1,5 +1,3 @@
-// OMS Data Collector package adapted from 
-// https://github.com/Azure/oms-log-analytics-firehose-nozzle
 package main
 
 import (
@@ -18,9 +16,9 @@ import (
 // Required parameters
 var (
 	// Update customerId to your Operations Management Suite workspace ID
-	omscustomerID    = "11a3f44a-8e89-40e4-9a7e-7f145d8b2c68"
+	omscustomerID    = "xxxxxxxx-xxx-xxx-xxx-xxxxxxxxxxxx"
 	// For sharedKey, use either the primary or the secondary Connected Sources client authentication key
-	omssharedKey     = "GpR2PSS0pemW/930iEcwgCcN3GjgmF1BCnYhKUmxVgKCWenMRbRl7pghaDMrEpwzOcIkQLan/jvYhGK5qrLixg=="
+	omssharedKey     = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 	// HTTP timeout for posting events to OMS Log Analytics
 	omsPostTimeout   = 5 * time.Second
 )
@@ -35,7 +33,7 @@ type omsMessage struct {
 	SourceSystem   string `json:"sourceSystem,omitempty"`
 	ContainerID    string `json:"containerId"`
 	ContainerName  string `json:"containerName"`
-	TimeGenerated  string  `json:"timeGenerated"`
+	TimeGenerated  string `json:"timeGenerated"`
 	LogEntry       string `json:"logEntry"`
 }
 
@@ -72,7 +70,6 @@ func (c *omslogclient) PostData(msg *[]byte, logType string) error {
 	// Headers
 	contentLength := len(*msg)
 	rfc1123date := time.Now().UTC().Format(time.RFC1123)
-	//TODO: rfc1123 date should have UTC offset
 	rfc1123date = strings.Replace(rfc1123date, "UTC", "GMT", 1)
 	//Signature
 	signature, err := c.buildSignature(rfc1123date, contentLength, method, contentType, resource)
@@ -86,8 +83,6 @@ func (c *omslogclient) PostData(msg *[]byte, logType string) error {
 	}
 	req.Header.Set("Authorization", signature)
 	req.Header.Set("Log-Type", logType)
-	//TODO: headers should be case insentitive
-	//req.Header.Set("x-ms-date", rfc1123date)
 	req.Header["x-ms-date"] = []string{rfc1123date}
 	req.Header.Set("Content-Type", "application/json")
 
@@ -101,7 +96,7 @@ func (c *omslogclient) PostData(msg *[]byte, logType string) error {
 		return fmt.Errorf("Post Error. HTTP response code:%d message:%s", resp.StatusCode, resp.Status)
 	}
 	
-	fmt.Printf("API success code: %d", resp.StatusCode)
+	fmt.Printf("API POST success! HTTP response code: %d", resp.StatusCode)
 	return nil
 }
 
@@ -129,15 +124,15 @@ func main() {
 			ContainerID:    "1234567890",
 			ContainerName:  "mycontainer",
 			TimeGenerated:  time.Now().Format(time.RFC3339),
-			LogEntry:       "super important log event",
+			LogEntry:       "Golang API sample code log event",
 		}
 
 	buffer, err := json.Marshal(msg)
 	if err != nil {
-		fmt.Println("error:", err)
+		fmt.Println("JSON convert error:", err)
 	}
 	postErr := omsclient.PostData(&buffer, "ContainerLog")
 	if postErr != nil {
-		fmt.Println("error:", postErr)
+		fmt.Println("API POST error:", postErr)
 	}
 }
