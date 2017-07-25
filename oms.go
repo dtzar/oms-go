@@ -45,5 +45,8 @@ func main() {
 	if err != nil {
 		fmt.Println("error:", err)
 	}
-	omsclient.PostData(&buffer, "Container Log")
+	postErr := omsclient.PostData(&buffer, "Container Log")
+	if postErr != nil {
+		fmt.Println("error:", postErr)
+	}
 }
