@@ -24,6 +24,7 @@ type omslogclient struct {
 	sharedKey       string
 	url             string
 	httpPostTimeout time.Duration
+	client			*http.Client
 }
 
 const (
@@ -43,6 +44,7 @@ func NewOmsLogClient(customerID string, sharedKey string, postTimeout time.Durat
 		sharedKey:       sharedKey,
 		url:             "https://" + customerID + ".ods.opinsights.azure.com" + resource + "?api-version=2016-04-01",
 		httpPostTimeout: postTimeout,
+		client: 		 &http.Client{ Timeout: postTimeout	},
 	}
 }
 
@@ -70,10 +72,7 @@ func (c *omslogclient) PostData(msg *[]byte, logType string) error {
 	req.Header["x-ms-date"] = []string{rfc1123date}
 	req.Header.Set("Content-Type", "application/json")
 
-	client := http.Client{
-		Timeout: c.httpPostTimeout,
-	}
-	resp, err := client.Do(req)
+	resp, err := c.client.Do(req)
 	if err != nil {
 		return err
 	}
